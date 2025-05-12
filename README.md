@@ -4,7 +4,7 @@ Welcome to your new project1.
 
 It contains these folders and files, following our recommended project layout:
 
-File or Folder | Purpose
+File or Folder | Purpose here
 ---------|----------
 `app/` | content for UI frontends goes here
 `db/` | your domain models and data go here
