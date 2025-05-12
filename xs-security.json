@@ -1,0 +1,7 @@
+{
+  "xsappname": "zo030100010",
+  "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
+  "scopes": [],
+  "role-templates": []
+}
