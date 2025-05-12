@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "cds serve",
-      "request": "launch",
+      "request": "launch", 
       "type": "node",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "cds",
