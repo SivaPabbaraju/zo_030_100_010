@@ -1,0 +1,145 @@
+_schema-version: 3.3.0
+ID: zotc_i002
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: zotc_i002-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: zotc_i002-db
+  - name: zotc_i002-auth
+  - name: zotc_i002-destination
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    instances: 1
+  build-parameters:
+    builder: npm-ci
+- name: zotc_i002-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: zotc_i002-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: zotc_i002-app-deployer
+  type: com.sap.application.content
+  path: gen
+  requires:
+  - name: zotc_i002-html5-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: app/
+    requires:
+    - artifacts:
+      - project1.zip
+      name: zotc_i002project1
+      target-path: app/
+- name: zotc_i002project1
+  type: html5
+  path: app/project1
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: zotc_i002-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: zotc_i002-destination
+    parameters:
+      content-target: true
+  - name: zotc_i002-html5-repo-host
+    parameters:
+      service-key:
+        name: zotc_i002-html5-repo-host-key
+  - name: zotc_i002-auth
+    parameters:
+      service-key:
+        name: zotc_i002-auth-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: zotc_i002_html_repo_host
+          ServiceInstanceName: zotc_i002-html5-service
+          ServiceKeyName: zotc_i002-html5-repo-host-key
+          sap.cloud.service: zotc_i002
+        - Authentication: OAuth2UserTokenExchange
+          Name: zotc_i002_uaa
+          ServiceInstanceName: zotc_i002-xsuaa-service
+          ServiceKeyName: zotc_i002-auth-key
+          sap.cloud.service: zotc_i002
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+resources:
+- name: zotc_i002-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: zotc_i002-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: zotc_i002-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: zotc_i002-xsuaa-service
+    service-plan: application
+- name: zotc_i002-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: zotc_i002-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: zotc_i002-html5-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: zotc_i002-html5-service
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
