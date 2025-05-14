@@ -1,6 +1,6 @@
 _schema-version: 3.3.0
 ID: zotc_i002
-description: A simple CAP project.
+description: A simple CAP project
 version: 1.0.0
 modules:
 - name: zotc_i002-srv
