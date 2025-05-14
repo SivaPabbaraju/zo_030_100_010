@@ -7,7 +7,6 @@ modules:
   type: nodejs
   path: gen/srv
   requires:
-  - name: zotc_i002-db
   - name: zotc_i002-auth
   - name: zotc_i002-destination
   provides:
@@ -19,13 +18,6 @@ modules:
     instances: 1
   build-parameters:
     builder: npm-ci
-- name: zotc_i002-db-deployer
-  type: hdb
-  path: gen/db
-  requires:
-  - name: zotc_i002-db
-  parameters:
-    buildpack: nodejs_buildpack
 - name: zotc_i002-app-deployer
   type: com.sap.application.content
   path: gen
