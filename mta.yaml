@@ -81,11 +81,6 @@ modules:
   build-parameters:
     no-source: true
 resources:
-- name: zotc_i002-db
-  type: com.sap.xs.hdi-container
-  parameters:
-    service: hana
-    service-plan: hdi-shared
 - name: zotc_i002-auth
   type: org.cloudfoundry.managed-service
   parameters:
